@@ -1,0 +1,90 @@
+package RecuHilos1;
+
+/**
+ *
+ * @author Sara
+ */
+public class SumaArrayHilosMain
+{
+    public static void main(String[] args) 
+    {
+        /*Sustituir por los valores indicados */
+       int arraydni[]={1,2,3,4,5,6,7,8};
+       int arrayfechanac[]={0,5,0,3,2,0,0,1};
+       int arraydnir[]={8,7,6,5,4,3,2,1};
+       
+       HiloArray hilo1 = new HiloArray("Sara", arraydni);
+       HiloArray hilo2 = new HiloArray("Martin", arrayfechanac);
+       HiloArray hilo3 = new HiloArray("Mateo", arraydnir);
+       
+       Thread t1 = new Thread(hilo1);
+       Thread t2 = new Thread(hilo2);
+       Thread t3 = new Thread(hilo3);
+       
+       t1.start();
+       t2.start();
+       t3.start();
+       
+    }//fin main
+
+}//fin class
+/*********************************************************************************************************/
+package RecuHilos1;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author Sara
+ */
+public class HiloArray  implements Runnable
+{
+    String nom;
+    int array[];
+    
+    
+    //Constructor
+    HiloArray (String nombrealumno, int array[])
+    {
+        this.nom = nombrealumno;
+        this.array = array;
+    }
+    //Punto de entrada del hilo
+    public void run()
+    {
+        SumarArray sumaArray = new SumarArray();
+        System.out.println("Hilo " + nom + " iniciado...");
+        int num = sumaArray.suma(array);
+        System.out.println("Suma array hilo " + nom + " = " + num);
+        System.out.println("Hilo " + nom + " terminado...");
+    }
+
+}//fin class
+/****************************************************************************************************************/
+package RecuHilos1;
+
+/**
+ *
+ * @author Sara
+ */
+public class SumarArray 
+{
+    int num = 0;
+    public synchronized int suma(int array[])
+    {
+        for (int i = 0; i < array.length; i++)
+        {
+            num = num + array[i];
+        }
+        try {
+            //dormir el hilo 10milisegundos
+            Thread.sleep(10);
+        } 
+        catch (InterruptedException ex) 
+        {
+        }
+        return num;
+    }
+}//fin class
+/****************************************************************************************************/
