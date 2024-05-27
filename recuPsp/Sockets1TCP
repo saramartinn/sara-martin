@@ -1,0 +1,157 @@
+TCP
+/************************************************************************************************/
+package RecuSocketsTCP;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+/**
+ *
+ * @author Sara
+ */
+public class Ej1SockectServidor 
+{
+    public static void main(String[] args) 
+    {
+        int puerto = 1234;
+        
+        try
+        {
+            ServerSocket Servidor = new ServerSocket(puerto); //socket servidor asociado puerto
+            System.out.println("Socket servidor");
+            System.out.println(" ");
+            Socket cliente1= Servidor.accept();
+            
+            //recibir numero de cliente1
+            DataInputStream in1 = new DataInputStream(cliente1.getInputStream());
+            int numC1 = in1.readInt();
+            System.out.println("Número recibido: " + numC1);
+            System.out.println(" ");
+            
+            //enviar a cliente2
+            Socket cliente2 = Servidor.accept();
+            DataOutputStream out2 = new DataOutputStream(cliente2.getOutputStream());
+            out2.writeInt(numC1);
+            out2.flush();
+            System.out.println("Número enviado al Cliente 2");
+            
+            //recibir factorial de cliente 2
+            DataInputStream in2 = new DataInputStream(cliente2.getInputStream());
+            int factorial = in2.readInt();
+            System.out.println("Factorial recibido" ); 
+            
+            //enviar factorial a cliente 1
+            DataOutputStream out1 = new DataOutputStream(cliente1.getOutputStream());
+            out1.writeInt(factorial);
+            out1.flush();
+            
+            // Cerrar conexiones
+            cliente1.close();
+            cliente2.close();
+            Servidor.close();
+        }
+        catch (IOException excepcion) 
+        {
+            excepcion.printStackTrace();
+        }
+    }//main
+    
+}//fin class
+/************************************************************************************************/
+package RecuSocketsTCP;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Scanner;
+
+/**
+ *
+ * @author Sara
+ */
+public class Ej1SockectCliente1
+{
+    public static void main(String[] args) 
+    {
+        String host="localhost";
+        int puerto=1234;
+        Scanner entrada = new Scanner(System.in);
+        int numero = 0;
+        
+        try
+        {
+            Socket Cliente1 = new Socket(host,puerto);
+            System.out.println("Inserta un número:");
+            numero = entrada.nextInt();
+            
+            //enviar el numero al servidor
+            DataOutputStream out = new DataOutputStream(Cliente1.getOutputStream());
+            out.writeInt(numero);
+            out.flush();
+            
+            //recibir factorial y visualizarlo
+            DataInputStream in = new DataInputStream(Cliente1.getInputStream());
+            int factorial = in.readInt();
+            System.out.println("Factorial recibido: " + factorial);
+            
+           Cliente1.close(); // Cierre del socket del cliente 1
+        }
+        catch (IOException excepcion) {
+            excepcion.printStackTrace();
+        }
+    }//main
+}//fin class
+/************************************************************************************************/
+package RecuSocketsTCP;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Scanner;
+
+/**
+ *
+ * @author Sara
+ */
+public class Ej1SockectCliente2 
+{
+    public static void main(String[] args) 
+    {
+        String host="localhost";
+        int puerto=1234;
+        
+        try 
+        {
+            Socket cliente2 = new Socket(host,puerto);
+            System.out.println("Cliente 2 conectado al servidor.");
+            System.out.println(" ");
+            
+            //recibir el numero del servidor
+            DataInputStream in = new DataInputStream(cliente2.getInputStream());
+            int numC1 = in.readInt();
+            
+            int factorial = 1;
+            for (int i = 1; i <= numC1; i++)
+            {
+                factorial *= i;
+            }
+            
+            //enviar factorial al servidor
+            DataOutputStream out = new DataOutputStream(cliente2.getOutputStream());
+            out.writeInt(factorial);
+            out.flush();
+            System.out.println("Factorial enviado al Servidor");
+            
+            cliente2.close(); // Cierre del socket del cliente 2
+        }
+        catch (IOException excepcion) {
+            excepcion.printStackTrace();
+        }
+    }//main
+}//fin class
+/************************************************************************************************/
