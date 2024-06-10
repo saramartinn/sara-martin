@@ -130,3 +130,137 @@ public class Ej2SocketVisualizar
 }//fin class
 /************************************************************************************/
 UDP
+package RecuSocketsUDP;
+
+import EjSockectsUDP.ej1SockectsServidor;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author Sara
+ */
+public class Ej2SockectServidor
+{
+    public static void main(String[] args)
+    {
+        final int puerto = 5000;
+        try(DatagramSocket servidor = new DatagramSocket(puerto))
+        {
+            while (true)
+            {   
+                byte[] numAleatorios = new byte[10];
+
+                //recibir el array
+                DatagramPacket entrada = new DatagramPacket(numAleatorios, numAleatorios.length);
+                servidor.receive(entrada);
+                numAleatorios = entrada.getData();
+                System.out.println("Array recibido del cliente");
+
+                //sacar las operaciones
+                int suma = 0;
+                int mayor = (int) numAleatorios[0];
+                int menor = (int) numAleatorios[0];
+                for (int i = 0; i < numAleatorios.length; i++)
+                {
+                    System.out.print((int)numAleatorios[i] + " ");
+                    suma = (suma + (int)numAleatorios[i]);
+                    if (mayor < numAleatorios[i])
+                    {
+                        mayor = numAleatorios[i];
+                    }
+                    if (menor > numAleatorios[i])
+                    {
+                        menor = numAleatorios[i];
+                    }
+                }
+                System.out.println();//enviar resultado al cliente
+                byte[] operaciones = new byte[3];
+                operaciones[0] = (byte) suma;
+                System.out.println("La sumana es:" + suma); 
+                System.out.println("La sumana es:" + (byte)suma); 
+                operaciones[1] = (byte) mayor;
+                operaciones[2] = (byte) menor;
+                InetAddress direccionCliente = entrada.getAddress();
+                int puertoC = entrada.getPort();
+                DatagramPacket enviar = new DatagramPacket(operaciones, operaciones.length, direccionCliente, puertoC);
+                servidor.send(enviar);
+            }
+            
+        }
+        catch (IOException ex) {
+            Logger.getLogger(ej1SockectsServidor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//main
+}//class
+/************************************************************************************/
+package RecuSocketsUDP;
+
+import EjSockectsUDP.ej1SockectCliente1;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *
+ * @author Sara
+ */
+public class Ej2SocketCliente 
+{
+    public static void main(String[] args) throws SocketException
+    {
+        final int puerto = 5000;
+        try (DatagramSocket cliente = new DatagramSocket())
+        {
+            byte[] buffer = new byte[1024];
+            InetAddress direccion = InetAddress.getLocalHost();
+            
+            Random random = new Random();
+       
+            // Crear el array aleatorio
+            byte[] numAleatorios = new byte[10];
+            for (int i = 0; i < 10; i++) 
+            {
+                numAleatorios[i] = (byte) random.nextInt(11);
+                System.out.print((int)numAleatorios[i] + " ");            
+            }
+            System.out.println();
+            
+            //enviar al servidor
+            DatagramPacket enviar = new DatagramPacket(numAleatorios, numAleatorios.length, direccion, puerto);
+            cliente.send(enviar);
+            System.out.println("enviado array");
+            
+            //recibir del servidor
+            byte[] resultados = new byte[1000];
+            DatagramPacket entrada = new DatagramPacket(resultados, resultados.length);
+            cliente.receive(entrada);
+            resultados = entrada.getData();
+            System.out.println("Resultados recibidos del servidor");
+            
+            //visualizar resultados 
+            System.out.println("La suma del array es: " + (int)resultados[0]);
+            System.out.println("El numero mayor del array es: " + resultados[1]);
+            System.out.println("El numero menor del array es: " + resultados[2]);
+            
+            // Cerrar el socket del cliente
+            cliente.close();
+        }
+        catch (SocketException | UnknownHostException ex) {
+            Logger.getLogger(ej1SockectCliente1.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ej1SockectCliente1.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//main
+
+}//fin class
