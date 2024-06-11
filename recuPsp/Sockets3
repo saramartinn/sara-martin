@@ -1,0 +1,403 @@
+TCP
+/**
+ *
+ * @author Sara
+ */
+public class ej3SocketServidor
+{
+    public static void main(String[] arg) throws IOException,ClassNotFoundException 
+    {
+        ServerSocket servidor =  new ServerSocket(6003);
+        System.out.println("Esperando al cliente.....");   
+        Socket cliente = servidor.accept();
+
+        // Se prepara un flujo de salida para objetos 		
+        ObjectOutputStream outObjeto = new ObjectOutputStream(cliente.getOutputStream());
+        ObjectInputStream inObjeto = new ObjectInputStream(cliente.getInputStream());
+        
+        //calcular IVA y ImporteTotal
+        Factura factura = (Factura) inObjeto.readObject();
+        int IVA = 0;
+        int total = 0;
+        if (factura.getTipoIVA().equals("IGC"))
+        {
+            IVA = ((factura.getImporte()*7)/100);
+            total = IVA + factura.getImporte();
+            factura.setIVA(IVA);
+            factura.setImporteTotal(total);
+        }
+        if (factura.getTipoIVA().equals("ESP"))
+        {
+            IVA = ((factura.getImporte()*21)/100);
+            total = IVA + factura.getImporte();
+            factura.setIVA(IVA);
+            factura.setImporteTotal(total);
+        }
+        if (factura.getTipoIVA().equals("EUR"))
+        {
+            IVA = ((factura.getImporte()*15)/100);
+            total = IVA + factura.getImporte();
+            factura.setIVA(IVA);
+            factura.setImporteTotal(total);
+        }
+        
+        outObjeto.writeObject(factura);
+
+        // CERRAR STREAMS Y SOCKETS
+        outObjeto.close();
+        inObjeto.close();
+        cliente.close();
+        servidor.close();
+    }   
+}//class
+/*******************************************************************************************************/
+/**
+ *
+ * @author Sara
+ */
+public class ej3SocketCliente
+{
+    public static void main(String[] arg) throws IOException,ClassNotFoundException
+    {
+       Scanner entrada = new Scanner(System.in);
+
+        String host = "localhost";
+        int numeroPuerto = 5001; // Puerto del servidor
+
+        // Crear el socket para conectarse al servidor
+        Socket servidor = new Socket(host, numeroPuerto);
+        Scanner scanner = new Scanner(System.in);
+        
+        //pedimos los datos de la factura por pantalla
+        System.out.print("Escribe el numero de la factura: ");
+        String numFactura = scanner.nextLine();
+        System.out.print("Escribe la fecha de la factura: ");
+        String fechaFactura = scanner.nextLine();
+        System.out.print("Escribe el importe en euros: ");
+        int importe = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("Escribe el tipo de iva: ");
+        String tipoIVA = scanner.nextLine();
+
+        Factura factura = new Factura(numFactura, fechaFactura, importe, tipoIVA, 0, 0);
+
+        // Enviar el objeto factura al servidor
+        ObjectOutputStream outObjeto = new ObjectOutputStream(servidor.getOutputStream());
+        outObjeto.writeObject(factura);
+
+        // Recibir el objeto factura modificado desde el servidor
+        ObjectInputStream inObjeto = new ObjectInputStream(servidor.getInputStream());
+        Factura dato = (Factura) inObjeto.readObject();
+
+        System.out.println("");
+        System.out.println("Factura con número " + numFactura + " ,Fecha " + fechaFactura + " e importe: " + importe);
+        System.out.println("Con tipo de IVA: " + tipoIVA);
+        System.out.println("Tiene un IVA del " + dato.getIVA() + "% y su importe total es " + dato.getImporteTotal());
+
+        // Cerrar los streams y el socket
+        outObjeto.close();
+        inObjeto.close();
+        servidor.close();
+    }
+}//class
+/*******************************************************************************************************/
+/**
+ * @author Sara
+ */
+public class Factura implements Serializable 
+{
+    String numFactura;
+    String fechaFactura;
+    int importe;
+    String tipoIVA;
+    int IVA;
+    int importeTotal;
+
+    public Factura(String numFactura, String fechaFactura, int importe, String tipoIVA, int IVA, int importeTotal)
+    {
+        this.numFactura = numFactura;
+        this.fechaFactura = fechaFactura;
+        this.importe = importe;
+        this.tipoIVA = tipoIVA;
+        this.IVA = IVA;
+        this.importeTotal = importeTotal;
+    }
+
+    public Factura() {super();}
+    
+    public String getNumFactura() {
+        return numFactura;
+    }
+
+    public void setNumFactura(String numFactura) {
+        this.numFactura = numFactura;
+    }
+
+    public String getFechaFactura() {
+        return fechaFactura;
+    }
+
+    public void setFechaFactura(String fechaFactura) {
+        this.fechaFactura = fechaFactura;
+    }
+
+    public int getImporte() {
+        return importe;
+    }
+
+    public void setImporte(int importe) {
+        this.importe = importe;
+    }
+
+    public String getTipoIVA() {
+        return tipoIVA;
+    }
+
+    public void setTipoIVA(String tipoIVA) {
+        this.tipoIVA = tipoIVA;
+    }
+
+    public int getIVA() {
+        return IVA;
+    }
+
+    public void setIVA(int IVA) {
+        this.IVA = IVA;
+    }
+
+    public int getImporteTotal() {
+        return importeTotal;
+    }
+
+    public void setImporteTotal(int importeTotal) {
+        this.importeTotal = importeTotal;
+    }
+    
+    
+}//class
+/*******************************************************************************************************/
+UDP
+import java.io.Serializable;
+
+public class Factura implements Serializable
+{
+    String numFactura;
+    String fechaFactura;
+    int importe;
+    String tipoIVA;
+    int IVA;
+    int importeTotal;
+
+    public Factura(String numFactura, String fechaFactura, int importe, String tipoIVA, int IVA, int importeTotal)
+    {
+        this.numFactura = numFactura;
+        this.fechaFactura = fechaFactura;
+        this.importe = importe;
+        this.tipoIVA = tipoIVA;
+        this.IVA = IVA;
+        this.importeTotal = importeTotal;
+    }
+
+    public Factura() {super();}
+    
+    public String getNumFactura() {
+        return numFactura;
+    }
+
+    public void setNumFactura(String numFactura) {
+        this.numFactura = numFactura;
+    }
+
+    public String getFechaFactura() {
+        return fechaFactura;
+    }
+
+    public void setFechaFactura(String fechaFactura) {
+        this.fechaFactura = fechaFactura;
+    }
+
+    public int getImporte() {
+        return importe;
+    }
+
+    public void setImporte(int importe) {
+        this.importe = importe;
+    }
+
+    public String getTipoIVA() {
+        return tipoIVA;
+    }
+
+    public void setTipoIVA(String tipoIVA) {
+        this.tipoIVA = tipoIVA;
+    }
+
+    public int getIVA() {
+        return IVA;
+    }
+
+    public void setIVA(int IVA) {
+        this.IVA = IVA;
+    }
+
+    public int getImporteTotal() {
+        return importeTotal;
+    }
+
+    public void setImporteTotal(int importeTotal) {
+        this.importeTotal = importeTotal;
+    }
+    
+    
+}//class
+/*******************************************************************************************************/
+/**
+ *
+ * @author Sara
+ */
+public class ej3SocketCliente 
+{
+    public static void main(String[] arg) throws IOException,ClassNotFoundException
+    {
+        try{
+            int puerto = 1550;
+            // Socket servidor
+            DatagramSocket cliente = new DatagramSocket();
+            InetAddress direccion = InetAddress.getByName("localhost");	
+            Scanner scanner = new Scanner(System.in);
+
+            //pedimos los datos de la factura por pantalla
+            System.out.print("Escribe el numero de la factura: ");
+            String numFactura = scanner.nextLine();
+            System.out.print("Escribe la fecha de la factura: ");
+            String fechaFactura = scanner.nextLine();
+            System.out.print("Escribe el importe en euros: ");
+            int importe = scanner.nextInt();
+            scanner.nextLine();
+            System.out.println("Escribe el tipo de iva: ");
+            String tipoIVA = scanner.nextLine();
+
+            //creamos factura
+            Factura factura = new Factura(numFactura, fechaFactura, importe, tipoIVA, 0, 0);
+        
+            // Se envia la factura
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();// flujo de bytes de salida en memoria
+            ObjectOutputStream objectStream = new ObjectOutputStream(byteStream);// escribir objetos en un flujo de salida
+            objectStream.writeObject(factura);// Escribe el objeto en el flujo de salida.
+            
+            byte[] datosFactura = byteStream.toByteArray();// Convierte el contenido array en bytes.
+            
+            DatagramPacket paquete = new DatagramPacket(datosFactura, datosFactura.length, direccion, puerto);
+            System.out.println("Cliente mandando factura a servidor");
+            System.out.println(" ");
+
+            // Enviar el paquete
+            cliente.send(paquete);
+            
+            byte[] bufferRecibido = new byte[1024];
+            DatagramPacket paqueteRecibido = new DatagramPacket(bufferRecibido, bufferRecibido.length);
+            // Recibir el paquete del servidor
+            cliente.receive(paqueteRecibido);
+            
+            byte[] datosFacturaRecibidos = paqueteRecibido.getData();// meto el paquete en el array
+            ByteArrayInputStream byteStreamRecibido = new ByteArrayInputStream(datosFacturaRecibidos);//secuencia de entrada 
+            ObjectInputStream objectStreamRecibido = new ObjectInputStream(byteStreamRecibido);//lee objetos serializados de la secuencia de entrada.
+            //genera el objeto
+            Factura factura1 = (Factura) objectStreamRecibido.readObject();
+            
+            System.out.println("Factura recibida:");
+            System.out.println("Número de factura: " + factura1.getNumFactura());
+            System.out.println("Importe: " + factura1.getImporte());
+            System.out.println("Fecha: " + factura1.getFechaFactura());
+            System.out.println("Tipo de IVA: " + factura1.getTipoIVA());
+            System.out.println("IVA: " + factura1.getIVA());
+            System.out.println("Importe total: " + factura1.getImporteTotal());	
+            
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(ej1SockectsServidor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+    }
+}//fin class
+/*******************************************************************************************************/
+/**
+ *
+ * @author Sara
+ */
+public class ej3SocketServidor 
+{
+    public static void main(String[] args) throws ClassNotFoundException 
+    {
+        try 
+        {
+            int puerto = 1550;
+            // Socket servidor
+            DatagramSocket servidor = new DatagramSocket(puerto);
+            System.out.println("Servidor iniciado");
+            
+            // Buffer para almacenar los datos recibidos
+            byte[] buffer = new byte[1024];
+            DatagramPacket paqueteRecibido = new DatagramPacket(buffer, buffer.length);
+            
+            // Recibir el paquete del cliente
+            servidor.receive(paqueteRecibido);
+            System.out.println("Paquete recibido");
+            System.out.println(" ");
+            
+            // Convertir los bytes recibidos a un objeto Factura
+            byte[] datosFactura = paqueteRecibido.getData();// meto el paquete en el array
+            ByteArrayInputStream byteStream = new ByteArrayInputStream(datosFactura);//secuencia de entrada 
+            ObjectInputStream objectStream = new ObjectInputStream(byteStream);//lee objetos serializados de la secuencia de entrada.
+            //genera el objeto
+            Factura factura = (Factura) objectStream.readObject();
+            
+            int importe = factura.getImporte();
+            String tipoIVA = factura.getTipoIVA();
+            int importeTotal = 0;
+            int iva = 0;
+            
+            if (tipoIVA.equals("ESP")) 
+            {
+                iva = (int) (0.21 * importe);
+                importeTotal = iva + importe;
+            } 
+            else if (tipoIVA.equals("IGC")) 
+            {
+                iva = (int) (0.07 * importe);
+                importeTotal = iva + importe;
+            } else if (tipoIVA.equals("EUR")) 
+            {
+                iva = (int) (0.15 * importe);
+                importeTotal = iva + importe;
+            }
+            else
+            {
+                    System.out.println("Tienes que elegir un tipo de IVA");    
+            }
+
+            factura.setIVA(iva);
+            factura.setImporteTotal(importeTotal);
+            
+            Factura facturaConIVA = new Factura(factura.getNumFactura(),factura.getFechaFactura(),importe,tipoIVA,iva, importeTotal);
+
+            ByteArrayOutputStream byteStreamVuelta = new ByteArrayOutputStream();// flujo de bytes de salida en memoria
+            ObjectOutputStream objectStreamVuelta = new ObjectOutputStream(byteStreamVuelta);// escribir objetos en un flujo de salida
+            objectStreamVuelta.writeObject(factura);// Escribe el objeto en el flujo de salida.
+            
+            byte[] datosFacturaVuelta = byteStreamVuelta.toByteArray();// Convierte el contenido array en bytes.
+            
+            InetAddress direccion = paqueteRecibido.getAddress();
+            int puertoVuelta = paqueteRecibido.getPort();
+                    
+            DatagramPacket paqueteVuelta = new DatagramPacket(datosFacturaVuelta, datosFacturaVuelta.length, direccion, puertoVuelta);
+
+            servidor.send(paqueteVuelta);
+            System.out.println("Servidor mandando factura a cliente");
+            System.out.println(" ");
+            
+            // Cerrar el socket del servidor
+            servidor.close();
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(ej1SockectsServidor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+    }
+}//FIN CLASS
